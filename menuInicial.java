@@ -6,10 +6,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-class pet {
-    String nome, tipo, sexo, bairro, idade, peso, raca;
+enum TipoPet {
+    CACHORRO, GATO;
+}
 
-    public pet(String nome, String tipo, String sexo, String bairro, String idade, String peso, String raca) {
+enum SexoPet {
+    MACHO, FEMEA;
+}
+
+class pet {
+    public static final String NAO_INFORMADO = "NAO_INFORMADO";
+    String nome, rua, numero, cidade, bairro, idade, peso, raca;
+    TipoPet tipo;
+    SexoPet sexo;
+
+    public pet(String nome, TipoPet tipo, SexoPet sexo, String rua, String numero, String cidade, String bairro, String idade, String peso, String raca) {
         this.nome = nome;
         this.tipo = tipo;
         this.sexo = sexo;
@@ -51,29 +62,87 @@ public class menuInicial {
                         String nomeCompleto = scanner.nextLine().trim();
 
                         try {
-                            if (!nomeCompleto.contains(" ") || nomeCompleto.split(" ").length < 2) {
-                                throw new IllegalArgumentException("Erro: Você deve digitar nome e sobrenome!");
+                            if (nomeCompleto.isEmpty()) {
+                                nomeCompleto = pet.NAO_INFORMADO;
+                            } else if (!nomeCompleto.contains(" ") || nomeCompleto.split(" ").length < 2 || !nomeCompleto.matches("[a-zA-ZÀ-ÿ\\s]+")) {
+                                throw new IllegalArgumentException("Erro:  Nome inválido! Digite nome e sobrenome usando apenas letras.");
                             }
 
                             System.out.print(linhas.get(1) + " ");
-                            String tipo = scanner.nextLine();
+                            TipoPet tipo = TipoPet.valueOf(scanner.nextLine().trim().toUpperCase());
 
-                            System.out.print(linhas.get(2) + " ");
-                            String sexo = scanner.nextLine();
+                            System.out.print(linhas.get(2) + "(MACHO/FEMEA): ");
+                            SexoPet sexo = SexoPet.valueOf(scanner.nextLine().trim().toUpperCase());
 
-                            System.out.print(linhas.get(3) + " ");
+                            System.out.println(linhas.get(3) + " ");
+
+                            System.out.println("Rua: ");
+                            String rua = scanner.nextLine();
+
+                            System.out.println("Número da casa: ");
+                            String numero = scanner.nextLine();
+
+                            if (!numero.matches("[0-9]+")) {
+                                throw new IllegalArgumentException("Erro: O número da casa deve conter apenas algarismos!");
+                            }
+
+                            System.out.println("Cidade: ");
+                            String cidade = scanner.nextLine();
+
+                            System.out.println("Bairro: ");
                             String bairro = scanner.nextLine();
 
-                            System.out.print(linhas.get(4) + " ");
-                            String idade = scanner.nextLine();
 
+                            System.out.print(linhas.get(4) + " ");
+                            String idadeDigitada = scanner.nextLine().trim().replace(",", ".");
+                            String idadeParaSalvar;
+
+                            if (idadeDigitada.isEmpty()) {
+                                    idadeParaSalvar = pet.NAO_INFORMADO;
+                            } else {
+                                if (!idadeDigitada.matches("[0-9.,]+")) {
+                                    throw new IllegalArgumentException("Erro: digite apenas números");
+                                }
+                                double valorIdade = Double.parseDouble(idadeDigitada);
+
+                                if (valorIdade < 1 && valorIdade > 0 && idadeDigitada.contains(".")) {
+                                    valorIdade = (valorIdade * 10) / 12.0;
+                                    System.out.println("Idade convertida de meses para anos: " + String.format("%.2f", valorIdade));
+                                }
+
+                                if (valorIdade > 20) {
+                                    throw new IllegalArgumentException("Erro: A idade do pet não pode ser maior que 20 anos!");
+                                }
+                                String idade = String.valueOf(valorIdade);
+                            }
                             System.out.print(linhas.get(5) + " ");
-                            String peso = scanner.nextLine();
+                            String pesoDigitado = scanner.nextLine().trim().replace(",", ".");
+                            String pesoFinal;
+
+                            if (pesoDigitado.isEmpty()) {
+                                pesoFinal = pet.NAO_INFORMADO;
+                            } else {
+                                if (!pesoDigitado.matches("[0-9.,]+")) {
+                                    throw new IllegalArgumentException("Erro: digite apenas números");
+                                }
+                            }
+                            double valorPeso = Double.parseDouble(pesoDigitado);
+                            if (valorPeso < 0.5 || valorPeso > 60) {
+                                throw new IllegalArgumentException("Erro: o peso deve ser entre 0.5kg e 60kg.");
+                            }
+                            String peso = pesoDigitado;
+
 
                             System.out.print(linhas.get(6) + " ");
-                            String raca = scanner.nextLine();
+                            String raca = scanner.nextLine().trim();
 
-                            pet novopet = new pet(nomeCompleto, tipo, sexo, bairro, idade, peso, raca);
+                            if (raca.isEmpty()) {
+                                raca = pet.NAO_INFORMADO;
+                            } else if (!raca.matches("[a-zA-ZÀ-ÿ\\s]+")) {
+                                throw new IllegalArgumentException("Erro: A raça deve conter apenas letras e espaços, sem números ou símbolos!");
+                            }
+
+                            pet novopet = new pet(nomeCompleto, tipo, sexo, rua, numero, cidade, bairro, idade, peso, raca);
                             bancoDeDados.add(novopet);
 
                             System.out.println("\n✅ Pet cadastrado com sucesso!");
