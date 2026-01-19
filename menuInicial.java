@@ -24,6 +24,9 @@ class pet {
         this.nome = nome;
         this.tipo = tipo;
         this.sexo = sexo;
+        this.rua = rua;
+        this.numero = numero;
+        this.cidade = cidade;
         this.bairro = bairro;
         this.idade = idade;
         this.peso = peso;
@@ -80,11 +83,18 @@ public class menuInicial {
                             String rua = scanner.nextLine();
 
                             System.out.println("Número da casa: ");
-                            String numero = scanner.nextLine();
+                            String numero = scanner.nextLine().trim();
+                            String numeroParaSalvar;
 
-                            if (!numero.matches("[0-9]+")) {
-                                throw new IllegalArgumentException("Erro: O número da casa deve conter apenas algarismos!");
+                            if (numero.isEmpty()) {
+                                numeroParaSalvar = pet.NAO_INFORMADO;
+                            } else {
+                                if (!numero.matches("[0-9]+")) {
+                                    throw new IllegalArgumentException("Erro: O número da casa deve conter apenas algarismos!");
+                                }
+                                numeroParaSalvar = numero;
                             }
+
 
                             System.out.println("Cidade: ");
                             String cidade = scanner.nextLine();
@@ -98,7 +108,7 @@ public class menuInicial {
                             String idadeParaSalvar;
 
                             if (idadeDigitada.isEmpty()) {
-                                    idadeParaSalvar = pet.NAO_INFORMADO;
+                                idadeParaSalvar = pet.NAO_INFORMADO;
                             } else {
                                 if (!idadeDigitada.matches("[0-9.,]+")) {
                                     throw new IllegalArgumentException("Erro: digite apenas números");
@@ -113,7 +123,7 @@ public class menuInicial {
                                 if (valorIdade > 20) {
                                     throw new IllegalArgumentException("Erro: A idade do pet não pode ser maior que 20 anos!");
                                 }
-                                String idade = String.valueOf(valorIdade);
+                                idadeParaSalvar = String.valueOf(valorIdade);
                             }
                             System.out.print(linhas.get(5) + " ");
                             String pesoDigitado = scanner.nextLine().trim().replace(",", ".");
@@ -125,13 +135,12 @@ public class menuInicial {
                                 if (!pesoDigitado.matches("[0-9.,]+")) {
                                     throw new IllegalArgumentException("Erro: digite apenas números");
                                 }
+                                double valorPeso = Double.parseDouble(pesoDigitado);
+                                if (valorPeso < 0.5 || valorPeso > 60) {
+                                    throw new IllegalArgumentException("Erro: o peso deve ser entre 0.5kg e 60kg.");
+                                }
+                                pesoFinal = String.valueOf(valorPeso);
                             }
-                            double valorPeso = Double.parseDouble(pesoDigitado);
-                            if (valorPeso < 0.5 || valorPeso > 60) {
-                                throw new IllegalArgumentException("Erro: o peso deve ser entre 0.5kg e 60kg.");
-                            }
-                            String peso = pesoDigitado;
-
 
                             System.out.print(linhas.get(6) + " ");
                             String raca = scanner.nextLine().trim();
@@ -142,8 +151,9 @@ public class menuInicial {
                                 throw new IllegalArgumentException("Erro: A raça deve conter apenas letras e espaços, sem números ou símbolos!");
                             }
 
-                            pet novopet = new pet(nomeCompleto, tipo, sexo, rua, numero, cidade, bairro, idade, peso, raca);
+                            pet novopet = new pet(nomeCompleto, tipo, sexo, rua, numeroParaSalvar, cidade, bairro, idadeParaSalvar, pesoFinal, raca);
                             bancoDeDados.add(novopet);
+
 
                             System.out.println("\n✅ Pet cadastrado com sucesso!");
                             imprimirMenu();
