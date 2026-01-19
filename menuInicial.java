@@ -1,3 +1,5 @@
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -73,6 +75,7 @@ public class menuInicial {
 
                             System.out.print(linhas.get(1) + " ");
                             TipoPet tipo = TipoPet.valueOf(scanner.nextLine().trim().toUpperCase());
+
 
                             System.out.print(linhas.get(2) + "(MACHO/FEMEA): ");
                             SexoPet sexo = SexoPet.valueOf(scanner.nextLine().trim().toUpperCase());
@@ -154,6 +157,40 @@ public class menuInicial {
                             pet novopet = new pet(nomeCompleto, tipo, sexo, rua, numeroParaSalvar, cidade, bairro, idadeParaSalvar, pesoFinal, raca);
                             bancoDeDados.add(novopet);
 
+                            java.time.LocalDateTime agora = java.time.LocalDateTime.now();//acessa o relógio do sistema e captura a data e hora exata do momento do cadastro (Ano, Mês, Dia, Hora, Minuto, Segundo e Nanosegundo).
+                            java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmm"); //Define como a data deve ser escrita no texto.'T': O Java trata letras dentro de aspas simples como texto fixo, inserindo o "T" para separar a data da hora
+
+                            String dataHora = agora.format(fmt);//Você precisa transformar o 'agora' em texto usando o formato
+
+                            String nomeFormatado = nomeCompleto.replace(" ", "").toUpperCase();
+                            String nomeDoArquivo = dataHora + "-" + nomeFormatado + ".txt";
+
+
+                            String enderecoCompleto = rua + "," + numeroParaSalvar + "," + cidade + "," + bairro;
+
+                            List<String> respostas = new ArrayList<>();
+                            respostas.add(nomeCompleto);
+                            respostas.add(tipo.name());
+                            respostas.add(sexo.name());
+                            respostas.add(enderecoCompleto);
+                            respostas.add(idadeParaSalvar);
+                            respostas.add(pesoFinal);
+
+                            File pasta = new File("petsCadastrados");
+                            if (!pasta.exists()) {
+                                pasta.mkdirs();//Cria a pasta caso ela não exista
+                            }
+
+                            File arquivoFinal = new File(pasta, nomeDoArquivo);
+                            try (FileWriter writer = new FileWriter(arquivoFinal)) {
+                                for (int i = 0; i < respostas.size(); i++) {
+                                    int num = i + 1;
+                                    writer.write(num + "-" + respostas.get(i) + System.lineSeparator());
+                                }
+                                System.out.println("Arquivo gerado com sucesso: " + nomeDoArquivo);
+                            } catch (IOException e) {
+                                System.out.println("Erro ao salvar o arquivo: " + e.getMessage());
+                            }
 
                             System.out.println("\n✅ Pet cadastrado com sucesso!");
                             imprimirMenu();
