@@ -4,9 +4,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.ClientInfoStatus;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.SortedMap;
+import java.util.stream.Collectors;
 
 enum TipoPet {
     CACHORRO, GATO;
@@ -210,7 +214,90 @@ public class menuInicial {
                         System.out.println("Listar todos os pets cadastrados");
                         break;
                     case 5:
-                        System.out.println("Listar pets por algum critério (idade, nome, raça)");
+                        System.out.println(" \uD83D\uDD0D --- BUSCA DE PETS --- \uD83D\uDD0D");
+                        scanner.nextLine();//limpa o buffer
+
+
+                        System.out.println("Primeiro, informe o Tipo (CACHORRO ou GATO): ");
+                        String tipoEntrada = scanner.nextLine().trim().toUpperCase();
+
+                        List<pet> filtrados = bancoDeDados.stream().filter(p -> p.tipo.name().equalsIgnoreCase(tipoEntrada)).collect(Collectors.toList());
+
+                        System.out.println("Escolha até 2 critérios extras separados por vírgula (ex: 1,3):");
+                        System.out.println("1.Nome | 2.Sexo | 3.Idade | 4.Peso | 5.Raça | 6.Endereço");
+                        String[] escolhas = scanner.nextLine().split(",");
+
+                        for (int i = 0; i < Math.min(escolhas.length, 2); i++) {
+                            String criterio = escolhas[i].trim();
+
+                            switch (criterio) {
+                                case "1": //nome e sobrenome
+                                    System.out.println("Digite o nome ou sobrenome");
+                                    String buscarNome = normalizar(scanner.nextLine());
+                                    filtrados = filtrados.stream().filter(p -> normalizar(p.nome).contains(buscarNome)).collect(Collectors.toList());
+                                    break;
+                                case "2": // Sexo (Exato)
+                                    System.out.print("Digite o Sexo (MACHO/FEMEA): ");
+                                    String buscaSexo = scanner.nextLine().trim().toUpperCase();
+                                    filtrados = filtrados.stream()
+                                            .filter(p -> p.sexo.name().equals(buscaSexo))
+                                            .collect(Collectors.toList());
+                                    break;
+                                case "3": // Idade (Exato)
+                                    System.out.print("Digite a Idade: ");
+                                    String buscaIdade = scanner.nextLine().trim();
+                                    filtrados = filtrados.stream()
+                                            .filter(p -> p.idade.equals(buscaIdade))
+                                            .collect(Collectors.toList());
+                                    break;
+                                case "4": // Peso (Exato)
+                                    System.out.print("Digite o Peso: ");
+                                    String buscaPeso = scanner.nextLine().trim();
+                                    filtrados = filtrados.stream()
+                                            .filter(p -> p.peso.equals(buscaPeso))
+                                            .collect(Collectors.toList());
+                                    break;
+                                case "5": // Raça (Busca por PARTES)
+                                    System.out.print("Digite a Raça: ");
+                                    String buscaRaca = normalizar(scanner.nextLine());
+                                    filtrados = filtrados.stream()
+                                            .filter(p -> normalizar(p.raca).contains(buscaRaca))
+                                            .collect(Collectors.toList());
+                                    break;
+                                case "6": // Endereço (Busca por PARTES)
+                                    System.out.print("Digite parte do Endereço: ");
+                                    String buscaEnd = normalizar(scanner.nextLine());
+                                    filtrados = filtrados.stream()
+                                            .filter(p -> normalizar(p.rua + " " + p.bairro + " " + p.cidade).contains(buscaEnd))
+                                            .collect(Collectors.toList());
+                                    break;
+
+                            }
+                        }
+                        System.out.println("\n --- RESULTADOS ENCONTRADOS ---");
+                        if (filtrados.isEmpty()){
+                            System.out.println("Nenhum pet encontrado para os critérios informados.");
+                        } else {
+                            for (int i = 0; i < filtrados.size(); i++) {
+                                pet p = filtrados.get(i);
+
+
+                                // Regra de Formato: 1. Rex - Cachorro - Macho - Rua 1, 123 - Cidade 1 - 2 anos - 5kg - Vira-lata
+                                System.out.printf("%d. %s - %s - %s - %s, %s - %s - %s anos - %skg - %s%n",
+                                        (i + 1),
+                                        p.nome,
+                                        // Converte ENUM (CACHORRO) para texto amigável (Cachorro)
+                                        p.tipo.name().substring(0,1) + p.tipo.name().substring(1).toLowerCase(),
+                                        p.sexo.name().substring(0,1) + p.sexo.name().substring(1).toLowerCase(),
+                                        p.rua, p.numero, p.cidade,
+                                        p.idade,
+                                        p.peso,
+                                        p.raca);
+
+                            }
+                        }
+                        imprimirMenu();
+
                         break;
                     case 6:
                         System.out.println("Sair");
@@ -227,6 +314,12 @@ public class menuInicial {
             }
         }
         scanner.close();
+    }
+
+    public static String normalizar(String texto) {
+        if (texto == null) return "";
+        String nfd = java.text.Normalizer.normalize(texto, Normalizer.Form.NFD);
+        return nfd.replaceAll("\\p{InCombiningDiacriticalMarks}+", "").toLowerCase().trim();
     }
 
     public static void imprimirMenu() {
