@@ -1,0 +1,7 @@
+1-abigail silva
+2-GATO
+3-FEMEA
+4-a,01,b,c
+5-1.0
+6-1.0
+7-gato

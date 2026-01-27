@@ -54,8 +54,44 @@ public class menuInicial {
             System.err.println("Erro ao ler o Arquivo: " + e.getMessage());
         }
 
-        imprimirMenu();
 
+        File pasta = new File("petsCadastrados");
+        if (pasta.exists() && pasta.isDirectory()) {
+            File[] arquivos = pasta.listFiles((dir, nome) -> nome.endsWith(".txt"));
+            if (arquivos != null) {
+                for (File arquivo : arquivos) {
+                    try {
+                        List<String> dados = Files.readAllLines(arquivo.toPath());
+                        if (dados.size() >= 6) {
+                            String nome = dados.get(0);
+
+                            // Tratamento seguro para TipoPet
+                            TipoPet tipo = dados.get(1).equalsIgnoreCase("GATO") ? TipoPet.GATO : TipoPet.CACHORRO;
+
+                            // Tratamento seguro para SexoPet (EVITA O ERRO DO cMEA)
+                            SexoPet sexo = dados.get(2).equalsIgnoreCase("MACHO") ? SexoPet.MACHO : SexoPet.FEMEA;
+
+                            String[] partesEnd = dados.get(3).split(",");
+                            String rua = (partesEnd.length > 0) ? partesEnd[0] : "";
+                            String numero = (partesEnd.length > 1) ? partesEnd[1] : "";
+                            String cidade = (partesEnd.length > 2) ? partesEnd[2] : "";
+                            String bairro = (partesEnd.length > 3) ? partesEnd[3] : "";
+
+                            String idade = dados.get(4);
+                            String peso = dados.get(5);
+                            String raca = (dados.size() > 6) ? dados.get(6) : "NAO_INFORMADO";
+
+                            bancoDeDados.add(new pet(nome, tipo, sexo, rua, numero, cidade, bairro, idade, peso, raca));
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Erro crítico no arquivo " + arquivo.getName() + ": " + e.getMessage());
+                    }
+                }
+            }
+        }
+        System.out.println("SISTEMA: " + bancoDeDados.size() + " pets carregados com sucesso.");
+
+        imprimirMenu();
         Scanner scanner = new Scanner(System.in);
         int opcao = 0;
         while (opcao != 6) {
@@ -179,8 +215,9 @@ public class menuInicial {
                             respostas.add(enderecoCompleto);
                             respostas.add(idadeParaSalvar);
                             respostas.add(pesoFinal);
+                            respostas.add(raca);
 
-                            File pasta = new File("petsCadastrados");
+                            File pasta1 = new File("petsCadastrados");
                             if (!pasta.exists()) {
                                 pasta.mkdirs();//Cria a pasta caso ela não exista
                             }
@@ -221,7 +258,12 @@ public class menuInicial {
                         System.out.println("Primeiro, informe o Tipo (CACHORRO ou GATO): ");
                         String tipoEntrada = scanner.nextLine().trim().toUpperCase();
 
-                        List<pet> filtrados = bancoDeDados.stream().filter(p -> p.tipo.name().equalsIgnoreCase(tipoEntrada)).collect(Collectors.toList());
+                        if (!tipoEntrada.equals("CACHORRO") && !tipoEntrada.equals("GATO")) {
+                            System.out.println("⚠️ Tipo inválido! Digite exatamente CACHORRO ou GATO.");
+                            break;
+                        }
+
+                        List<pet> filtrados = bancoDeDados.stream().filter(p -> p.tipo.name().trim().equalsIgnoreCase(tipoEntrada.trim())).collect(Collectors.toList());
 
                         System.out.println("Escolha até 2 critérios extras separados por vírgula (ex: 1,3):");
                         System.out.println("1.Nome | 2.Sexo | 3.Idade | 4.Peso | 5.Raça | 6.Endereço");
@@ -238,9 +280,9 @@ public class menuInicial {
                                     break;
                                 case "2": // Sexo (Exato)
                                     System.out.print("Digite o Sexo (MACHO/FEMEA): ");
-                                    String buscaSexo = scanner.nextLine().trim().toUpperCase();
+                                    String buscaSexo = scanner.nextLine().trim();
                                     filtrados = filtrados.stream()
-                                            .filter(p -> p.sexo.name().equals(buscaSexo))
+                                            .filter(p -> p.sexo.name().equalsIgnoreCase(buscaSexo))
                                             .collect(Collectors.toList());
                                     break;
                                 case "3": // Idade (Exato)
