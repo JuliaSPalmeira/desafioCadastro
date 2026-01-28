@@ -242,7 +242,74 @@ public class menuInicial {
                         }
                         break;
                     case 2:
-                        System.out.println("Alterar os dados do pet cadastrado");
+                        System.out.println("--- ALTERAÇÃO DOS DADOS DE UM PET ---");
+
+                        System.out.println("Primeiro, informe o Tipo (CACHORRO ou GATO): "); //lógica de busca por filtro
+                        scanner.nextLine();
+                        String tipoAlt = scanner.nextLine().trim().toUpperCase();
+
+                        if (!tipoAlt.equals("CACHORRO") && !tipoAlt.equals("GATO")) {
+                            System.out.println("⚠️ Tipo inválido!");
+                            break;
+                        }
+
+                        //filtra e exibe a lista para seleção
+                        List<pet> filtradosAlt = bancoDeDados.stream().filter(p -> p.tipo.name().equalsIgnoreCase(tipoAlt)).collect(Collectors.toList());
+
+
+                        if (filtradosAlt.isEmpty()) {
+                            System.out.println("Nenhum pet encontrado");
+                            break;
+                        }
+
+                        for (int i = 0; i < filtradosAlt.size(); i++) {
+                            pet p = filtradosAlt.get(i);
+                            System.out.printf("%d. %s - %s - %s - %s - %s - %s - %s - %s - %s%n",
+                                    (i + 1), p.nome, p.raca, p.cidade, p.tipo, p.peso, p.bairro, p.idade, p.rua, p.sexo, p.numero
+                            );
+                        }
+
+                        System.out.println("\nDigite o número do pet que deseja alterar: ");
+                        int escolha = scanner.nextInt();
+                        scanner.nextLine();
+
+                        if (escolha < 1 || escolha > filtradosAlt.size()) {
+                            System.out.println("⚠️ Opção inválida!");
+                            break;
+                        }
+
+                        //ref do pet alterado
+                        pet petSelecionado = filtradosAlt.get(escolha - 1);
+
+                        //solicitação de novos dados(exceto tipo e sexo)
+                        System.out.println("--- Informe os novos dados para " + petSelecionado.nome + "---");
+
+                        System.out.println("Novo Nome:");
+                        petSelecionado.nome = scanner.nextLine();
+
+                        System.out.println("Nova Idade:");
+                        petSelecionado.idade = scanner.nextLine();
+
+                        System.out.println("Novo Peso:");
+                        petSelecionado.peso = scanner.nextLine();
+
+                        System.out.println("Nova Raça:");
+                        petSelecionado.raca = scanner.nextLine();
+
+                        System.out.println("Nova Rua:");
+                        petSelecionado.rua = scanner.nextLine();
+
+                        System.out.println("Novo Bairro:");
+                        petSelecionado.bairro = scanner.nextLine();
+
+                        System.out.println("Nova Cidade:");
+                        petSelecionado.cidade = scanner.nextLine();
+
+                        System.out.println("Novo Número:");
+                        petSelecionado.numero = scanner.nextLine();
+
+                        System.out.println("✅ Dados alterados com sucesso!");
+
                         break;
                     case 3:
                         System.out.println("Deletar os dados do pet cadastrado");
@@ -317,7 +384,7 @@ public class menuInicial {
                             }
                         }
                         System.out.println("\n --- RESULTADOS ENCONTRADOS ---");
-                        if (filtrados.isEmpty()){
+                        if (filtrados.isEmpty()) {
                             System.out.println("Nenhum pet encontrado para os critérios informados.");
                         } else {
                             for (int i = 0; i < filtrados.size(); i++) {
@@ -329,8 +396,8 @@ public class menuInicial {
                                         (i + 1),
                                         p.nome,
                                         // Converte ENUM (CACHORRO) para texto amigável (Cachorro)
-                                        p.tipo.name().substring(0,1) + p.tipo.name().substring(1).toLowerCase(),
-                                        p.sexo.name().substring(0,1) + p.sexo.name().substring(1).toLowerCase(),
+                                        p.tipo.name().substring(0, 1) + p.tipo.name().substring(1).toLowerCase(),
+                                        p.sexo.name().substring(0, 1) + p.sexo.name().substring(1).toLowerCase(),
                                         p.rua, p.numero, p.cidade,
                                         p.idade,
                                         p.peso,
