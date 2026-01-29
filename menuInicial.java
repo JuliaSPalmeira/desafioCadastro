@@ -313,9 +313,94 @@ public class menuInicial {
                         break;
                     case 3:
                         System.out.println("Deletar os dados do pet cadastrado");
+                        scanner.nextLine();
+
+                        while (true) {
+                            System.out.println("Primeiro, informe o Tipo (CACHORRO ou GATO): "); //lógica de busca por filtro
+                            String tipoDel = scanner.nextLine().trim().toUpperCase();
+
+                            if (!tipoDel.equals("CACHORRO") && !tipoDel.equals("GATO")) {
+                                System.out.println("⚠️ Tipo inválido!");
+                                continue; //exibe o menu de busca novamente
+                            }
+
+                            List<pet> filtradosDel = bancoDeDados.stream()
+                                    .filter(p -> p.tipo.name().equalsIgnoreCase(tipoDel))
+                                    .collect(Collectors.toList());
+
+                            if (filtradosDel.isEmpty()) {
+                                System.out.println("Nenhum pet encontrado");
+                                break;
+                            }
+
+                            //exibe a lista para escolha
+                            for (int i = 0; i < filtradosDel.size(); i++) {
+                                System.out.println(i + " - " + filtradosDel.get(i).nome);
+                            }
+
+                            System.out.println("Escolha o número do pet que deseja deletar");
+                            if (scanner.hasNextInt()) {
+                                int escolhaDel = scanner.nextInt();
+                                scanner.nextLine(); //limpar buffer
+
+                                if (escolhaDel >= 0 && escolhaDel < filtradosDel.size()) {
+                                    pet petAlvo = filtradosDel.get(escolhaDel);
+
+                                    System.out.println("Confirmar exclusão de " + petAlvo.nome + "? (SIM/NÃO)");
+                                    String confirma = scanner.nextLine().trim().toUpperCase();
+
+                                    if (confirma.equals("SIM")) {
+                                        System.out.println("tamanho antes: " + bancoDeDados.size());
+                                        bancoDeDados.remove(petAlvo);
+                                        System.out.println("tamanho depois: " + bancoDeDados.size());
+
+                                        try {
+                                            File pastaDel = new File("petsCadastrados");
+                                            File[] arquivos = pastaDel.listFiles();
+
+                                            if (arquivos != null) {
+                                                String nomeBuscarArquivo = petAlvo.nome.replace("1-", "").trim().toUpperCase();
+                                                for (File f : arquivos) {
+                                                    if (f.getName().contains(nomeBuscarArquivo)) {
+                                                        if (f.delete()) {
+                                                            System.out.println("Arquivo " + f.getName() + " removido fisicamente.");
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }catch (SecurityException e){
+                                            System.out.println("Erro de permissão ao acessar/deletar arquivos: " + e.getMessage());
+                                        }catch (Exception e){
+                                            System.out.println("Ocorreu um erro inesperado: "+ e.getMessage());
+                                        }
+                                        System.out.println("✅ Pet deletado com sucesso!");//remove do banco principal
+                                    } else {
+                                        System.out.println("Operação candelada.");
+                                    }
+                                    break; // sai do loop após finalizar
+                                } else {
+                                    System.out.println("\uFE0F Número inválido!");
+                                    //o while fara exibir a lista nivamente
+                                }
+                            }
+                        }
+                        imprimirMenu();
                         break;
                     case 4:
                         System.out.println("Listar todos os pets cadastrados");
+                        if (bancoDeDados.isEmpty()) {
+                            System.out.println("Nenhum pet encontrado no sistema.");
+                        } else {
+                            // Percorre a lista que você carregou no início do programa
+                            for (int i = 0; i < bancoDeDados.size(); i++) {
+                                pet p = bancoDeDados.get(i);
+                                System.out.println((i + 1) + ". " + p.nome + " [" + p.tipo + "]");
+                                System.out.println("   Raça: " + p.raca + " | Idade: " + p.idade + " anos");
+                                System.out.println("   Sexo: " + p.sexo + " | Peso: " + p.peso + "kg");
+                                System.out.println("   Endereço: " + p.rua + ", " + p.numero + " - " + p.bairro + "/" + p.cidade);
+                                System.out.println("---------------------------------");
+                            }
+                        }
                         break;
                     case 5:
                         System.out.println(" \uD83D\uDD0D --- BUSCA DE PETS --- \uD83D\uDD0D");
